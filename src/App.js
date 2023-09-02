@@ -26,11 +26,56 @@ function App() {
   };
 
   const evaluateExpression = (expression) => {
-    // Implement your own expression evaluation logic here
     try {
-      return String(eval(expression)); // Using eval for simplicity, replace with safer method
+      // Custom expression evaluation for basic arithmetic operations
+      const result = evalBasicExpression(expression);
+      return String(result);
     } catch (error) {
       throw error;
+    }
+  };
+
+  const evalBasicExpression = (expression) => {
+    // Define basic arithmetic operations
+    const operators = {
+      "+": (a, b) => a + b,
+      "-": (a, b) => a - b,
+      "*": (a, b) => a * b,
+      "/": (a, b) => a / b,
+    };
+
+    const tokens = expression.match(/(\d+\.?\d*|\+|-|\*|\/)/g);
+
+    if (!tokens) {
+      throw new Error("Invalid expression");
+    }
+
+    let stack = [];
+    let currentOperator = null;
+
+    for (const token of tokens) {
+      if (operators[token]) {
+        currentOperator = token;
+      } else {
+        const operand = parseFloat(token);
+        if (!isNaN(operand)) {
+          if (currentOperator) {
+            const previousOperand = stack.pop();
+            stack.push(operators[currentOperator](previousOperand, operand));
+            currentOperator = null;
+          } else {
+            stack.push(operand);
+          }
+        } else {
+          throw new Error("Invalid token: " + token);
+        }
+      }
+    }
+
+    if (stack.length === 1) {
+      return stack[0];
+    } else {
+      throw new Error("Invalid expression");
     }
   };
 
